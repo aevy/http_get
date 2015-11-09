@@ -7,7 +7,7 @@ class HttpGet::Client
     @opts = { agent_name: user_agent }
   end
 
-  def with_proxy(proxy: ::PROXIES.sample)
+  def with_proxy(proxy)
     host, port, user, password = proxy
     proxy_str = [[user, password].join(':'), "#{host}:#{port}"].join('@')
     @opts = @opts.merge({ proxy:  'http://' + proxy_str })
