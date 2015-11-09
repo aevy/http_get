@@ -24,17 +24,6 @@ class HttpGet::Client
     after_success.call(resp)
   end
 
-  def sneaky_url(url)
-    if url.match('linkedin.com')
-      url.sub('linkedin.com/pub', 'linkedin.com//pub').
-        sub('linkedin.com/in', 'linkedin.com//in').
-        sub('linkedin.com/company', 'linkedin.com//company').
-        sub('http://', 'https://')
-    else
-      url
-    end
-  end
-
   class BlockedError < StandardError; end
   class MissingError < StandardError; end
   class RedirectError < StandardError; end
