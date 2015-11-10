@@ -15,14 +15,26 @@ class HttpGet::Client
     self
   end
 
-  def get(url, params = {}, redirects: 0, after_success: ->(resp, _, _, _) { resp })
+  def get(url, params = {}, redirects = 0,
+          after_success: ->(resp) { resp },
+          before_redirect: ->(url) { url },
+          blocked_condition: ->(resp) { false })
     raise RedirectError if redirects > 5
 
     url = Addressable::URI.parse(url).normalize.to_s
-
     resp = HTTPClient.new(@opts).get(url, params)
 
-    after_success.call(resp, url, params, redirects)
+    if resp.status_code == 200
+      instance_eval { after_success.call(resp) }
+    elsif resp.status_code == 301
+      redirect_url = before_redirect.call(resp.header['Location'].first)
+
+      get(redirect_url, params, redirects + 1)
+    elsif blocked_condition.call(resp)
+      raise BlockedError
+    else
+      raise MissingError
+    end
   end
 
   class BlockedError < StandardError; end
