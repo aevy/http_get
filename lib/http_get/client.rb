@@ -29,7 +29,8 @@ class HttpGet::Client
     elsif resp.status_code == 301
       redirect_url = before_redirect.call(resp.header['Location'].first)
 
-      get(redirect_url, params, redirects + 1)
+      get(redirect_url, params, redirects + 1, after_success: after_success,
+         before_redirect: before_redirect, blocked_condition: blocked_condition)
     elsif blocked_condition.call(resp)
       raise BlockedError
     else
